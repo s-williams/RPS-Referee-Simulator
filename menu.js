@@ -1,5 +1,6 @@
 loadFont("pixelFont", "fonts/PixelOperatorMono8.ttf");
 loadSprite("referee", "gfx/referee.png");
+loadSound("click", "sfx/click.ogg");
 
 scene("menu", (hiScore = 0) => {
     // UI
@@ -64,7 +65,7 @@ scene("menu", (hiScore = 0) => {
         color(0, 0, 0),
         "instructions"
     ]);
-    onClick("instructions", () => { go("instructions", hiScore); });
+    onClick("instructions", () => { playSfx("click"); go("instructions", hiScore); });
     // Music and SFX mute buttons
     const musicText = add([
         text(musicMuted ? "Muted" : "Music", {
@@ -79,6 +80,7 @@ scene("menu", (hiScore = 0) => {
     ]);
     onClick("musicText", () => {
         toggleMusic();
+        playSfx("click");
     });
     let toggleMusic = () => {
         musicMuted = !musicMuted;
@@ -97,6 +99,7 @@ scene("menu", (hiScore = 0) => {
     ]);
     onClick("sfxText", () => {
         toggleSfx();
+        playSfx("click");
     });
     let toggleSfx = () => {
         sfxMuted = !sfxMuted;
@@ -226,9 +229,21 @@ scene("instructions", (hiScore = 0) => {
     onKeyPress("enter", () => { go("main", hiScore); });
     onKeyPress("escape", () => { go("menu", hiScore); })
     onKeyPress("2", () => { go('menu', hiScore); });
-    onClick("back", () => { go("menu", hiScore); });
+    onClick("back", () => { playSfx("click"); go("menu", hiScore); });
 
 });
+
+// Sound util
+let playSfx = (sfx, volume, detune) => {
+    volume = volume || 1.0;
+    detune = detune || 0;
+    if (!sfxMuted) {
+        play(sfx, {
+            volume: volume,
+            detune: detune,
+        });
+    }
+};
 
 try {
     go("menu", localStorage ? localStorage.getItem('hiscore') || 0 : 0);

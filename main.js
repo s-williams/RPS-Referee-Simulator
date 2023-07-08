@@ -1,4 +1,7 @@
 loadSound("music", "sfx/dreamer.mp3");
+loadSound("confirmation1", "sfx/confirmation1.ogg");
+loadSound("confirmation2", "sfx/confirmation2.ogg");
+loadSound("coins", "sfx/coins.ogg");
 
 loadSprite("rock", "gfx/rock.png");
 loadSprite("paper", "gfx/paper.png");
@@ -198,6 +201,7 @@ scene("main", (hiScore = 0) => {
             "playerBribe",
         ]);
         onClick("leftPlayerBribe", () => {
+            playSfx("coins");
             leftPlayerBribed = bribe;
             infamy += 5;
             destroyAll("leftPlayerBribe");
@@ -228,6 +232,7 @@ scene("main", (hiScore = 0) => {
             "playerBribe",
         ]);
         onClick("rightPlayerBribe", () => {
+            playSfx("coins");
             rightPlayerBribed = bribe;
             infamy += 5;
             destroyAll("rightPlayerBribe");
@@ -369,7 +374,7 @@ scene("main", (hiScore = 0) => {
                 } else {
                     rightPlayerBribe(randi(5, 15));                    
                 }
-            } else if (roundNumber < 10) {
+            } else if (roundNumber < 5) {
                 if (randi(0, 2) === 0) {
                     leftPlayerBribe(randi(5, 25));
                 } else {
@@ -382,6 +387,11 @@ scene("main", (hiScore = 0) => {
         }
     };
     let decisionMade = (decision) => {
+        if (decision === calculatedResult) {
+            playSfx("confirmation2");
+        } else {
+            playSfx("confirmation1");
+        }
         destroyAll("decisionLabel");
         destroyAll("playerBribe");
         secondaryText.text = "";
@@ -411,8 +421,9 @@ scene("main", (hiScore = 0) => {
             if (rightPlayerBribed) {
                 if (rightPlayerBribed && !leftPlayerBribed) {
                     rightPlayer("swearing");
+                } else {
+                    rightPlayer("enraged");
                 }
-                rightPlayer("enraged");
             }
         } else if (decision === "right") {
             rightPlayerScore += 1;
@@ -439,8 +450,9 @@ scene("main", (hiScore = 0) => {
             if (leftPlayerBribed) {
                 if (leftPlayerBribed && !rightPlayerBribed) {
                     leftPlayer("swearing");
+                } else {
+                    leftPlayer("enraged");
                 }
-                leftPlayer("enraged");
             }
         } else {
             if (calculatedResult === "left") {
