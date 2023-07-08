@@ -1,6 +1,7 @@
 loadFont("pixelFont", "fonts/PixelOperatorMono8.ttf")
 
 scene("menu", (hiScore = 0) => {
+    // UI
     add([
         text("$" + String(0), {
             size: FONT_SIZE,
@@ -19,6 +20,8 @@ scene("menu", (hiScore = 0) => {
         color(0, 0, 0),
         anchor("topleft")
     ]);
+
+    // Start text
     add([
         text("REFEREE SIMULATOR", {
             size: FONT_SIZE * 2,
@@ -28,8 +31,6 @@ scene("menu", (hiScore = 0) => {
         color(0, 0, 0),
         anchor("center")
     ]);
-
-    // Start text
     let startText = add([
         text("Click to Start", {
             size: FONT_SIZE,
@@ -48,7 +49,7 @@ scene("menu", (hiScore = 0) => {
 
     // Credits
     add([
-        text("Credits", {
+        text("Instructions", {
             size: FONT_SIZE,
             font: "pixelFont"
         }),
@@ -56,9 +57,10 @@ scene("menu", (hiScore = 0) => {
         anchor("bot"),
         area(),
         color(0, 0, 0),
-        "credits"
+        "instructions"
     ]);
-    onClick("credits", () => { go("credits", hiScore); });
+    onClick("instructions", () => { go("instructions", hiScore); });
+
     // Music and SFX mute buttons
     const musicText = add([
         text(musicMuted ? "Muted" : "Music", {
@@ -106,4 +108,108 @@ scene("menu", (hiScore = 0) => {
     onKeyPress("3", () => { toggleSfx(); });
 });
 
-go("menu");
+scene("instructions", (hiScore = 0) => {
+    // UI
+    add([
+        text("$" + String(0), {
+            size: FONT_SIZE,
+            font: "pixelFont"
+        }),
+        pos(width() - 5, 5),
+        color(0, 0, 0),
+        anchor("topright")
+    ]);
+    add([
+        text("HI $" + String(hiScore), {
+            size: FONT_SIZE,
+            font: "pixelFont"
+        }),
+        pos(5, 5),
+        color(0, 0, 0),
+        anchor("topleft")
+    ]);
+
+    // Instructions
+    add([
+        text("Instructions:", {
+            size: FONT_SIZE,
+            font: "pixelFont",
+            width: (width() - 10) / 2
+        }),
+        pos(5, 40),
+        color(0, 0, 0),
+        anchor("topleft")
+    ]);
+    add([
+        text("You are the referee of a Rock Paper Scissors tournament. \n\nDecide who wins each round. \n\nTake bribes. \n\nBe careful about being too corrupt. \n\nControls: mouse only \n\nGood luck.", {
+            size: FONT_SIZE - 4,
+            font: "pixelFont",
+            width: (width() - 10) / 2
+        }),
+        pos(5, 40 + FONT_SIZE * 2),
+        color(0, 0, 0),
+        anchor("topleft")
+    ]);
+    // Credits
+    add([
+        text("Credits:", {
+            size: FONT_SIZE,
+            font: "pixelFont",
+            width: (width() - 10) / 2,
+            align: "right"
+        }),
+        pos(width() - 5, 40),
+        color(0, 0, 0),
+        anchor("topright")
+    ]);
+    add([
+        text("Programming:\n\nswilliamsio\n\nhttps://www.swilliams.io/", {
+            size: FONT_SIZE - 4,
+            font: "pixelFont",
+            width: (width() - 10) / 2,
+            align: "right"
+        }),
+        pos(width() - 5, 40 + FONT_SIZE * 2),
+        color(0, 0, 0),
+        anchor("topright"),
+        area(),
+        "swilliamsio"
+    ]);
+    onClick("swilliamsio", () => window.open("https://www.swilliams.io", '_blank'));
+    add([
+        text("Music:\n\nDreamer\n\nKevin MacLeod\n\n\https://incompetech.com", {
+            size: FONT_SIZE - 4,
+            font: "pixelFont",
+            width: (width() - 10) / 2,
+            align: "right"
+        }),
+        pos(width() - 5, 40 + FONT_SIZE * 8),
+        color(0, 0, 0),
+        anchor("topright"),
+        area(),
+        "MacLeod"
+    ]);
+    onClick("MacLeod", () => window.open("https://incompetech.com", '_blank'));
+
+    // Back
+    add([
+        text("Back", {
+            size: FONT_SIZE,
+            font: "pixelFont"
+        }),
+        pos(240, height() - 30),
+        anchor("bot"),
+        area(),
+        color(0, 0, 0),
+        "back"
+    ]);
+    onKeyPress("space", () => { go("main", hiScore); });
+    onKeyPress("r", () => { go("main", hiScore); });
+    onKeyPress("enter", () => { go("main", hiScore); });
+    onKeyPress("escape", () => { go("menu", hiScore); })
+    onKeyPress("2", () => { go('menu', hiScore); });
+    onClick("back", () => { go("menu", hiScore); });
+
+});
+
+go("main");
