@@ -83,7 +83,7 @@ scene("main", (hiScore = 0) => {
         anchor("center"),
         "infamymeter",
     ]);
-	const infamyMeasure = add([
+	add([
         pos(width() / 2 - (width() * 0.8) / 2, height() * 0.9),
         rect(infamy, 20),
         outline(2),

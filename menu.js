@@ -1,4 +1,5 @@
-loadFont("pixelFont", "fonts/PixelOperatorMono8.ttf")
+loadFont("pixelFont", "fonts/PixelOperatorMono8.ttf");
+loadSprite("referee", "gfx/referee.png");
 
 scene("menu", (hiScore = 0) => {
     // UI
@@ -20,8 +21,13 @@ scene("menu", (hiScore = 0) => {
         color(0, 0, 0),
         anchor("topleft")
     ]);
-
     // Start text
+    add([
+        pos(width() / 2, 100),
+        sprite("referee"),
+        scale(0.8),
+        anchor("center"),
+    ]);
     add([
         text("REFEREE SIMULATOR", {
             size: FONT_SIZE * 2,
@@ -46,7 +52,6 @@ scene("menu", (hiScore = 0) => {
     loop(1, () => {
         startText.opacity = startText.opacity == 1 ? 0 : 1;
     });
-
     // Credits
     add([
         text("Instructions", {
@@ -60,7 +65,6 @@ scene("menu", (hiScore = 0) => {
         "instructions"
     ]);
     onClick("instructions", () => { go("instructions", hiScore); });
-
     // Music and SFX mute buttons
     const musicText = add([
         text(musicMuted ? "Muted" : "Music", {
@@ -163,7 +167,7 @@ scene("instructions", (hiScore = 0) => {
         anchor("topright")
     ]);
     add([
-        text("Programming:\n\nswilliamsio\n\nhttps://www.swilliams.io/", {
+        text("Programming:\n\nswilliamsio\n\nhttps://www.swilliams.io", {
             size: FONT_SIZE - 4,
             font: "pixelFont",
             width: (width() - 10) / 2,
@@ -191,7 +195,7 @@ scene("instructions", (hiScore = 0) => {
     ]);
     onClick("MacLeod", () => window.open("https://incompetech.com", '_blank'));
     add([
-        text("Graphics:\n\nhttps://openmoji.org/", {
+        text("Graphics:\n\nhttps://openmoji.org", {
             size: FONT_SIZE - 4,
             font: "pixelFont",
             width: (width() - 10) / 2,
@@ -203,7 +207,7 @@ scene("instructions", (hiScore = 0) => {
         area(),
         "openmoji"
     ]);
-    onClick("openmoji", () => window.open("https://openmoji.org/", '_blank'));
+    onClick("openmoji", () => window.open("https://openmoji.org", '_blank'));
 
     // Back
     add([
