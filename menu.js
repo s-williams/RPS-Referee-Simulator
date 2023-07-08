@@ -177,19 +177,33 @@ scene("instructions", (hiScore = 0) => {
     ]);
     onClick("swilliamsio", () => window.open("https://www.swilliams.io", '_blank'));
     add([
-        text("Music:\n\nDreamer\n\nKevin MacLeod\n\n\https://incompetech.com", {
+        text("Music:\n\nDreamer - Kevin MacLeod\n\n\https://incompetech.com", {
             size: FONT_SIZE - 4,
             font: "pixelFont",
             width: (width() - 10) / 2,
             align: "right"
         }),
-        pos(width() - 5, 40 + FONT_SIZE * 8),
+        pos(width() - 5, 40 + FONT_SIZE * 7),
         color(0, 0, 0),
         anchor("topright"),
         area(),
         "MacLeod"
     ]);
     onClick("MacLeod", () => window.open("https://incompetech.com", '_blank'));
+    add([
+        text("Graphics:\n\nhttps://openmoji.org/", {
+            size: FONT_SIZE - 4,
+            font: "pixelFont",
+            width: (width() - 10) / 2,
+            align: "right"
+        }),
+        pos(width() - 5, 40 + FONT_SIZE * 12),
+        color(0, 0, 0),
+        anchor("topright"),
+        area(),
+        "openmoji"
+    ]);
+    onClick("openmoji", () => window.open("https://openmoji.org/", '_blank'));
 
     // Back
     add([
@@ -212,4 +226,8 @@ scene("instructions", (hiScore = 0) => {
 
 });
 
-go("main");
+try {
+    go("menu", localStorage ? localStorage.getItem('hiscore') || 0 : 0);
+} catch {
+    go("menu", 0);
+}
