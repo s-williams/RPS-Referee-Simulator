@@ -32,6 +32,7 @@ loadSprite("worried", "gfx/worried.png");
 
 scene("main", (hiScore = 0) => {
     const MAX_INFAMY = 100;
+    const VICTORY_DIFFERENCE = 5;
 
     var score = 0;
     var leftPlayerScore = 0;
@@ -342,11 +343,19 @@ scene("main", (hiScore = 0) => {
         });
         // Player reactions to the expected result
         if (calculatedResult === "right") {
-            leftPlayer("grimace");
             rightPlayer("smirk");
+            if (rightPlayerScore > leftPlayerScore) {
+                leftPlayer("grimace");
+            } else {
+                leftPlayer("worried");
+            }
         } else if (calculatedResult === "left") {
             leftPlayer("smirk");
-            rightPlayer("grimace");
+            if (leftPlayerScore > rightPlayerScore) {
+                rightPlayer("grimace")
+            } else {
+                rightPlayer("worried");
+            }
         } else {
             leftPlayer("neutral");
             rightPlayer("neutral");
@@ -367,8 +376,8 @@ scene("main", (hiScore = 0) => {
                     rightPlayerBribe(randi(5, 25));                    
                 }
             } else {
-                leftPlayerBribe(randi(5, 50));
-                rightPlayerBribe(randi(5, 50));
+                leftPlayerBribe(randi(5 + roundNumber, 50 + roundNumber));
+                rightPlayerBribe(randi(5 + roundNumber, 50 + roundNumber));
             }
         }
     };
@@ -400,6 +409,9 @@ scene("main", (hiScore = 0) => {
                 score += leftPlayerBribed;
             }
             if (rightPlayerBribed) {
+                if (rightPlayerBribed && !leftPlayerBribed) {
+                    rightPlayer("swearing");
+                }
                 rightPlayer("enraged");
             }
         } else if (decision === "right") {
@@ -425,6 +437,9 @@ scene("main", (hiScore = 0) => {
                 score += rightPlayerBribed;                
             }
             if (leftPlayerBribed) {
+                if (leftPlayerBribed && !rightPlayerBribed) {
+                    leftPlayer("swearing");
+                }
                 leftPlayer("enraged");
             }
         } else {
@@ -456,7 +471,11 @@ scene("main", (hiScore = 0) => {
     };
     let eventDecider = () => {
         if (infamy > MAX_INFAMY) {
-            gameOver();
+            gameOverDisbarred();
+        } else if (leftPlayerScore >= rightPlayerScore + VICTORY_DIFFERENCE) {
+            gameOverVictory("Left");
+        } else if (rightPlayerScore >= leftPlayerScore + VICTORY_DIFFERENCE) {
+            gameOverVictory("Right");            
         } else {
             roundNumber += 1;
             wait(3, () => {
@@ -464,11 +483,25 @@ scene("main", (hiScore = 0) => {
             })
         }
     }
-    let gameOver = () => {
+    let gameOverDisbarred = () => {
         mainText.text = "You have been disbarred for foul play";
         secondaryText.text = "Press ESC to go back to menu"
         leftPlayer("spiral");
         rightPlayer("spiral");
+        loop(1, () => {
+            secondaryText.opacity = secondaryText.opacity == 1 ? 0 : 1;
+        })
+    }
+    let gameOverVictory = (player) => {
+        mainText.text = player + " player has won";
+        secondaryText.text = "Press ESC to go back to menu"
+        if (player === "Left") {
+            leftPlayer("grinning");
+            rightPlayer("frowning");
+        } else {
+            leftPlayer("frowning");
+            rightPlayer("grinning");
+        }
         loop(1, () => {
             secondaryText.opacity = secondaryText.opacity == 1 ? 0 : 1;
         })
