@@ -37,15 +37,17 @@ scene("main", (hiScore = 0) => {
     const MAX_INFAMY = 100;
     const VICTORY_DIFFERENCE = 5;
 
-    var score = 0;
-    var leftPlayerScore = 0;
-    var rightPlayerScore = 0;
-    var roundNumber = 1;
-    var calculatedResult = "";
-    var infamy = 0;
+    let score = 0;
+    let leftPlayerScore = 0;
+    let rightPlayerScore = 0;
+    let roundNumber = 1;
+    let calculatedResult = "";
+    let infamy = 0;
 
-    var leftPlayerBribed = 0;
-    var rightPlayerBribed = 0;
+    let leftPlayerBribed = 0;
+    let rightPlayerBribed = 0;
+    let leftPlayerBribeOffer = 0;
+    let rightPlayerBribeOffer = 0;
 
     // Music
     const music = play("music", {
@@ -179,6 +181,7 @@ scene("main", (hiScore = 0) => {
     }
     const leftPlayerBribe = (bribe) => {
         destroyAll("leftPlayerBribe");
+        leftPlayerBribeOffer = bribe;
         add([
             pos(80, height() / 2 + 105),
             sprite("money"),
@@ -190,7 +193,7 @@ scene("main", (hiScore = 0) => {
         ]);
         add([
             pos(95, height() / 2 + 105),
-            text("Take $" + String(bribe) + "\nbribe?", {
+            text("Take $" + String(leftPlayerBribeOffer) + "\nbribe?", {
                 size: FONT_SIZE - 4,
                 font: "pixelFont"
             }),
@@ -202,7 +205,7 @@ scene("main", (hiScore = 0) => {
         ]);
         onClick("leftPlayerBribe", () => {
             playSfx("coins");
-            leftPlayerBribed = bribe;
+            leftPlayerBribed = leftPlayerBribeOffer;
             infamy += 5;
             destroyAll("leftPlayerBribe");
             leftPlayer("disguised");
@@ -210,6 +213,7 @@ scene("main", (hiScore = 0) => {
     }
     const rightPlayerBribe = (bribe) => {
         destroyAll("rightPlayerBribe");
+        rightPlayerBribeOffer = bribe;
         add([
             pos(width() - 80, height() / 2 + 105),
             sprite("money"),
@@ -221,7 +225,7 @@ scene("main", (hiScore = 0) => {
         ]);
         add([
             pos(width() - 95, height() / 2 + 105),
-            text("Take $" + String(bribe) + "\nbribe?", {
+            text("Take $" + String(rightPlayerBribeOffer) + "\nbribe?", {
                 size: FONT_SIZE - 4,
                 font: "pixelFont"
             }),
@@ -233,7 +237,7 @@ scene("main", (hiScore = 0) => {
         ]);
         onClick("rightPlayerBribe", () => {
             playSfx("coins");
-            rightPlayerBribed = bribe;
+            rightPlayerBribed = rightPlayerBribeOffer;
             infamy += 5;
             destroyAll("rightPlayerBribe");
             rightPlayer("disguised");
