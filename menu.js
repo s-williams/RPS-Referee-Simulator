@@ -30,8 +30,8 @@ scene("menu", (hiScore = 0) => {
         anchor("center"),
     ]);
     add([
-        text("REFEREE SIMULATOR", {
-            size: FONT_SIZE * 2,
+        text("RPS REFEREE SIMULATOR", {
+            size: FONT_SIZE * 1.85,
             font: "pixelFont"
         }),
         pos(width() / 2, 200),
