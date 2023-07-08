@@ -4,6 +4,8 @@ loadSprite("rock", "gfx/rock.png");
 loadSprite("paper", "gfx/paper.png");
 loadSprite("scissors", "gfx/scissors.png");
 
+loadSprite("money", "gfx/money.png");
+
 loadSprite("angry", "gfx/angry.png");
 loadSprite("anguished", "gfx/anguished.png");
 loadSprite("astonished", "gfx/astonished.png");
@@ -29,12 +31,17 @@ loadSprite("unamused", "gfx/unamused.png");
 loadSprite("worried", "gfx/worried.png");
 
 scene("main", (hiScore = 0) => {
+    const MAX_INFAMY = 100;
+
     var score = 0;
     var leftPlayerScore = 0;
     var rightPlayerScore = 0;
     var roundNumber = 1;
     var calculatedResult = "";
     var infamy = 0;
+
+    var leftPlayerBribed = 0;
+    var rightPlayerBribed = 0;
 
     // Music
     const music = play("music", {
@@ -74,8 +81,8 @@ scene("main", (hiScore = 0) => {
             } catch { }
         }
         it.text = "HI $" + String(hiScore);
-    })
-	add([
+    });
+	const infamyMeter = add([
         pos(width() / 2, height() * 0.9),
         rect(width() * 0.8, 20),
         outline(2),
@@ -94,7 +101,7 @@ scene("main", (hiScore = 0) => {
         "infamyMeasure",
     ]);
     onUpdate("infamyMeasure", (it) => {
-        it.width = infamy
+        it.width = infamy * (infamyMeter.width / 100);
     })
     add([
         text(String(leftPlayerScore), {
@@ -103,7 +110,7 @@ scene("main", (hiScore = 0) => {
         }),
         pos(80, height() / 2 + 80),
         color(0, 0, 0),
-        anchor("botleft"),
+        anchor("center"),
         "leftPlayerScore",
     ]);
     onUpdate("leftPlayerScore", (it) => {
@@ -116,7 +123,7 @@ scene("main", (hiScore = 0) => {
         }),
         pos(width() - 80, height() / 2 + 80),
         color(0, 0, 0),
-        anchor("botright"),
+        anchor("center"),
         "rightPlayerScore",
     ]);
     onUpdate("rightPlayerScore", (it) => {
@@ -166,6 +173,66 @@ scene("main", (hiScore = 0) => {
             "playerChoice",
         ]);
     }
+    const leftPlayerBribe = (bribe) => {
+        destroyAll("leftPlayerBribe");
+        add([
+            pos(80, height() / 2 + 105),
+            sprite("money"),
+            scale(0.06),
+            area(),
+            anchor("center"),
+            "leftPlayerBribe",
+            "playerBribe",
+        ]);
+        add([
+            pos(95, height() / 2 + 105),
+            text("Take $" + String(bribe) + "\nbribe?", {
+                size: FONT_SIZE - 4,
+                font: "pixelFont"
+            }),
+            color(0, 0, 0),
+            area(),
+            anchor("left"),
+            "leftPlayerBribe",
+            "playerBribe",
+        ]);
+        onClick("leftPlayerBribe", () => {
+            leftPlayerBribed = bribe;
+            infamy += 5;
+            destroyAll("leftPlayerBribe");
+            leftPlayer("disguised");
+        });
+    }
+    const rightPlayerBribe = (bribe) => {
+        destroyAll("rightPlayerBribe");
+        add([
+            pos(width() - 80, height() / 2 + 105),
+            sprite("money"),
+            scale(0.06),
+            area(),
+            anchor("center"),
+            "rightPlayerBribe",
+            "playerBribe",
+        ]);
+        add([
+            pos(width() - 95, height() / 2 + 105),
+            text("Take $" + String(bribe) + "\nbribe?", {
+                size: FONT_SIZE - 4,
+                font: "pixelFont"
+            }),
+            color(0, 0, 0),
+            area(),
+            anchor("right"),
+            "rightPlayerBribe",
+            "playerBribe",
+        ]);
+        onClick("rightPlayerBribe", () => {
+            rightPlayerBribed = bribe;
+            infamy += 5;
+            destroyAll("rightPlayerBribe");
+            rightPlayer("disguised");
+        });
+    }
     const mainText = add([
         text("Welcome", {
             size: FONT_SIZE,
@@ -199,6 +266,8 @@ scene("main", (hiScore = 0) => {
     // Loop
     let startOfRound = () => {
         mainText.text = "Round " + roundNumber;
+        leftPlayerBribed = 0;
+        rightPlayerBribed = 0;
         leftPlayer("thinking");
         rightPlayer("thinking");
         destroyAll("playerChoice");
@@ -271,7 +340,6 @@ scene("main", (hiScore = 0) => {
         onClick("rightLabel", () => {
             decisionMade("right");
         });
-
         // Player reactions to the expected result
         if (calculatedResult === "right") {
             leftPlayer("grimace");
@@ -283,10 +351,32 @@ scene("main", (hiScore = 0) => {
             leftPlayer("neutral");
             rightPlayer("neutral");
         }
+        // Bribes
+        if (roundNumber > 2) {
+            // Always bribe on round 3
+            if (roundNumber === 3) {
+                if (randi(0, 2) === 0) {
+                    leftPlayerBribe(randi(5, 15));
+                } else {
+                    rightPlayerBribe(randi(5, 15));                    
+                }
+            } else if (roundNumber < 10) {
+                if (randi(0, 2) === 0) {
+                    leftPlayerBribe(randi(5, 25));
+                } else {
+                    rightPlayerBribe(randi(5, 25));                    
+                }
+            } else {
+                leftPlayerBribe(randi(5, 50));
+                rightPlayerBribe(randi(5, 50));
+            }
+        }
     };
     let decisionMade = (decision) => {
         destroyAll("decisionLabel");
+        destroyAll("playerBribe");
         secondaryText.text = "";
+        // Player reactions, scores, and infamy to the decided result
         if (decision === "left") {
             leftPlayerScore += 1;
             if (calculatedResult === "left") {
@@ -299,17 +389,26 @@ scene("main", (hiScore = 0) => {
                 infamy += 2;
                 leftPlayer("laughing");
                 rightPlayer("angry");
+                if (leftPlayerBribed) infamy += leftPlayerBribed;
             } else {
                 infamy += 1;
                 leftPlayer("relieved");
                 rightPlayer("angry");
+                if (leftPlayerBribed) infamy += leftPlayerBribed;
+            }
+            if (leftPlayerBribed) {
+                score += leftPlayerBribed;
+            }
+            if (rightPlayerBribed) {
+                rightPlayer("enraged");
             }
         } else if (decision === "right") {
             rightPlayerScore += 1;
             if (calculatedResult === "left") {
                 infamy += 2;
                 leftPlayer("angry");
-                rightPlayer("laughing");                
+                rightPlayer("laughing");
+                if (rightPlayerBribed) infamy += rightPlayerBribed;     
             } else if (calculatedResult === "right") {
                 infamy = infamy > 0 ? infamy - 1 : 0;
                 score += 5;
@@ -320,28 +419,43 @@ scene("main", (hiScore = 0) => {
                 infamy += 1;
                 leftPlayer("angry");
                 rightPlayer("relieved");
+                if (rightPlayerBribed) infamy += rightPlayerBribed;
+            }
+            if (rightPlayerBribed) {
+                score += rightPlayerBribed;                
+            }
+            if (leftPlayerBribed) {
+                leftPlayer("enraged");
             }
         } else {
             if (calculatedResult === "left") {
                 infamy += 1;
                 leftPlayer("pensive");
-                rightPlayer("relieved");                
+                rightPlayer("relieved");
+                if (rightPlayerBribed) {
+                    score += Math.floor(rightPlayerBribed / 2);
+                    infamy += Math.floor(rightPlayerBribed / 2);
+                }             
             } else if (calculatedResult === "right") {
                 infamy += 1;
                 leftPlayer("relieved");
                 rightPlayer("pensive");
+                if (leftPlayerBribed) {
+                    score += Math.floor(leftPlayerBribed / 2);
+                    infamy += Math.floor(leftPlayerBribed / 2);
+                }
             } else {
                 infamy = infamy > 0 ? infamy - 1 : 0;
                 score += 5;
                 secondaryText.text = "Referee'd correctly! +$5"
-                leftPlayer("neutral");
-                rightPlayer("neutral");
+                leftPlayer("relieved");
+                rightPlayer("relieved");
             }
         }
         wait(3, eventDecider())
     };
     let eventDecider = () => {
-        if (infamy > 200) {
+        if (infamy > MAX_INFAMY) {
             gameOver();
         } else {
             roundNumber += 1;

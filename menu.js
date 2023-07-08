@@ -231,7 +231,7 @@ scene("instructions", (hiScore = 0) => {
 });
 
 try {
-    go("menu", localStorage ? localStorage.getItem('hiscore') || 0 : 0);
+    go("main", localStorage ? localStorage.getItem('hiscore') || 0 : 0);
 } catch {
     go("menu", 0);
 }
