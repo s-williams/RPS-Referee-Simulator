@@ -54,7 +54,6 @@ scene("main", (hiScore = 0) => {
         volume: musicMuted ? 0 : 0.8,
         loop: true
     });
-
     // UI
     add([
         text("$" + String(score), {
@@ -261,7 +260,6 @@ scene("main", (hiScore = 0) => {
         color(0, 0, 0),
         anchor("center")
     ]);
-
     // Returns left, right, draw depending on who should win the game
     let calculateResult = (leftChoice, rightChoice) => {
         if (leftChoice === "rock" && rightChoice === "paper") return "right";
@@ -272,7 +270,6 @@ scene("main", (hiScore = 0) => {
         else if (leftChoice === "scissors" && rightChoice === "paper") return "left";
         else return "draw";
     }
-
     // Loop
     let startOfRound = () => {
         mainText.text = "Round " + roundNumber;
@@ -303,7 +300,7 @@ scene("main", (hiScore = 0) => {
         })
     };
     let decideWhoWon = () => {
-        secondaryText.text = "Decide who won"
+        secondaryText.text = "Decide who won";
         const textOffset = 80;
         add([
             text("Left", {
@@ -350,6 +347,16 @@ scene("main", (hiScore = 0) => {
         onClick("rightLabel", () => {
             decisionMade("right");
         });
+        onClick("leftPlayerChoice", () => {
+            if (secondaryText.text === "Decide who won") {
+                decisionMade("left");
+            }
+        });
+        onClick("rightPlayerChoice", () => {
+            if (secondaryText.text === "Decide who won") {
+                decisionMade("right");
+            }
+        });
         // Player reactions to the expected result
         if (calculatedResult === "right") {
             rightPlayer("smirk");
@@ -385,8 +392,8 @@ scene("main", (hiScore = 0) => {
                     rightPlayerBribe(randi(5, 25));                    
                 }
             } else {
-                leftPlayerBribe(randi(5 + roundNumber, 50 + roundNumber));
-                rightPlayerBribe(randi(5 + roundNumber, 50 + roundNumber));
+                leftPlayerBribe(randi(5 + roundNumber, 50 + (roundNumber * 2)));
+                rightPlayerBribe(randi(5 + roundNumber, 50 + (roundNumber * 2)));
             }
         }
     };

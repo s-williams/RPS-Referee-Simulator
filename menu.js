@@ -135,7 +135,6 @@ scene("instructions", (hiScore = 0) => {
         color(0, 0, 0),
         anchor("topleft")
     ]);
-
     // Instructions
     add([
         text("Instructions:", {
@@ -148,7 +147,7 @@ scene("instructions", (hiScore = 0) => {
         anchor("topleft")
     ]);
     add([
-        text("You are the referee of a Rock Paper Scissors tournament. \n\nDecide who wins each round.\n\nThe tournament ends when one player gets significantly more points than the other. \n\nTake bribes. \n\nBe careful about being too corrupt. Watch your corruption meter carefully. \n\nControls: mouse only. \n\nGood luck.", {
+        text("You are the referee of a Rock Paper Scissors tournament. \n\nDecide who wins each round.\n\nThe tournament ends when one player gets five more points than the other. \n\nTake bribes. \n\nBe careful about being too corrupt. Watch your corruption meter carefully. \n\nControls: mouse only. \n\nGood luck.", {
             size: FONT_SIZE - 4,
             font: "pixelFont",
             width: (width() - 10) / 2
@@ -211,7 +210,6 @@ scene("instructions", (hiScore = 0) => {
         "openmoji"
     ]);
     onClick("openmoji", () => window.open("https://openmoji.org", '_blank'));
-
     // Back
     add([
         text("Back", {
