@@ -40,7 +40,7 @@ scene("main", (hiScore = 0) => {
     let score = 0;
     let leftPlayerScore = 0;
     let rightPlayerScore = 0;
-    let roundNumber = 1;
+    let roundNumber = 0;
     let calculatedResult = "";
     let infamy = 0;
 
@@ -48,6 +48,23 @@ scene("main", (hiScore = 0) => {
     let rightPlayerBribed = 0;
     let leftPlayerBribeOffer = 0;
     let rightPlayerBribeOffer = 0;
+
+    let correctDecisionsInARow = 0;
+
+    let moneyGoals = [
+        20,
+        100,
+        250,
+        450,
+        700,
+        1000,
+        1400,
+        1900,
+        2500,
+        3500,
+        5000,
+        10000,
+    ]
 
     // Music
     const music = play("music", {
@@ -106,8 +123,9 @@ scene("main", (hiScore = 0) => {
         "infamyMeasure",
     ]);
     onUpdate("infamyMeasure", (it) => {
-        it.width = infamy * (infamyMeter.width / 100);
-    })
+        let infamyWidth = Math.min(infamy, MAX_INFAMY);
+        it.width = infamyWidth * (infamyMeter.width / MAX_INFAMY);
+    });
     add([
         text(String(leftPlayerScore), {
             size: FONT_SIZE,
@@ -205,7 +223,7 @@ scene("main", (hiScore = 0) => {
         onClick("leftPlayerBribe", () => {
             playSfx("coins");
             leftPlayerBribed = leftPlayerBribeOffer;
-            infamy += 5;
+            infamy += Math.floor(leftPlayerBribeOffer / 2);
             destroyAll("leftPlayerBribe");
             leftPlayer("disguised");
         });
@@ -237,7 +255,7 @@ scene("main", (hiScore = 0) => {
         onClick("rightPlayerBribe", () => {
             playSfx("coins");
             rightPlayerBribed = rightPlayerBribeOffer;
-            infamy += 5;
+            infamy += Math.floor(rightPlayerBribeOffer / 2);
             destroyAll("rightPlayerBribe");
             rightPlayer("disguised");
         });
@@ -258,7 +276,9 @@ scene("main", (hiScore = 0) => {
         }),
         pos(width() / 2, height() / 4 + FONT_SIZE * 2),
         color(0, 0, 0),
-        anchor("center")
+        area(),
+        anchor("center"),
+        "secondaryText",
     ]);
     // Returns left, right, draw depending on who should win the game
     let calculateResult = (leftChoice, rightChoice) => {
@@ -272,6 +292,7 @@ scene("main", (hiScore = 0) => {
     }
     // Loop
     let startOfRound = () => {
+        roundNumber += 1;
         mainText.text = "Round " + roundNumber;
         leftPlayerBribed = 0;
         rightPlayerBribed = 0;
@@ -410,21 +431,19 @@ scene("main", (hiScore = 0) => {
         if (decision === "left") {
             leftPlayerScore += 1;
             if (calculatedResult === "left") {
-                infamy = infamy > 0 ? infamy - 1 : 0;
-                score += 5;
-                secondaryText.text = "Referee'd correctly! +$5"
+                refereedCorrectly();
                 leftPlayer("relieved");
                 rightPlayer("pensive");                
             } else if (calculatedResult === "right") {
                 infamy += 2;
                 leftPlayer("laughing");
                 rightPlayer("angry");
-                if (leftPlayerBribed) infamy += leftPlayerBribed;
+                if (leftPlayerBribed) infamy += Math.floor(leftPlayerBribed / 2);
             } else {
                 infamy += 1;
                 leftPlayer("relieved");
                 rightPlayer("angry");
-                if (leftPlayerBribed) infamy += leftPlayerBribed;
+                if (leftPlayerBribed) infamy += Math.floor(leftPlayerBribed / 2);
             }
             if (leftPlayerBribed) {
                 score += leftPlayerBribed;
@@ -442,18 +461,16 @@ scene("main", (hiScore = 0) => {
                 infamy += 2;
                 leftPlayer("angry");
                 rightPlayer("laughing");
-                if (rightPlayerBribed) infamy += rightPlayerBribed;     
+                if (rightPlayerBribed) infamy += Math.floor(rightPlayerBribed / 2);     
             } else if (calculatedResult === "right") {
-                infamy = infamy > 0 ? infamy - 1 : 0;
-                score += 5;
-                secondaryText.text = "Referee'd correctly! +$5"
+                refereedCorrectly();
                 leftPlayer("pensive");
                 rightPlayer("relieved");
             } else {
                 infamy += 1;
                 leftPlayer("angry");
                 rightPlayer("relieved");
-                if (rightPlayerBribed) infamy += rightPlayerBribed;
+                if (rightPlayerBribed) infamy += Math.floor(rightPlayerBribed / 2);
             }
             if (rightPlayerBribed) {
                 score += rightPlayerBribed;                
@@ -471,7 +488,7 @@ scene("main", (hiScore = 0) => {
                 leftPlayer("pensive");
                 rightPlayer("relieved");
                 if (rightPlayerBribed) {
-                    score += Math.floor(rightPlayerBribed / 2);
+                    score += Math.ceil(rightPlayerBribed / 2);
                     infamy += Math.floor(rightPlayerBribed / 2);
                 }             
             } else if (calculatedResult === "right") {
@@ -479,45 +496,65 @@ scene("main", (hiScore = 0) => {
                 leftPlayer("relieved");
                 rightPlayer("pensive");
                 if (leftPlayerBribed) {
-                    score += Math.floor(leftPlayerBribed / 2);
+                    score += Math.ceil(leftPlayerBribed / 2);
                     infamy += Math.floor(leftPlayerBribed / 2);
                 }
             } else {
-                infamy = infamy > 0 ? infamy - 1 : 0;
-                score += 5;
-                secondaryText.text = "Referee'd correctly! +$5"
+                refereedCorrectly();
                 leftPlayer("relieved");
                 rightPlayer("relieved");
             }
         }
+        if (decision != calculatedResult) {
+            correctDecisionsInARow = 0;
+        }
         wait(3, eventDecider())
     };
-    let eventDecider = () => {
-        if (infamy > MAX_INFAMY) {
-            gameOverDisbarred();
-        } else if (leftPlayerScore >= rightPlayerScore + VICTORY_DIFFERENCE) {
-            gameOverVictory("Left");
-        } else if (rightPlayerScore >= leftPlayerScore + VICTORY_DIFFERENCE) {
-            gameOverVictory("Right");            
+    let refereedCorrectly = () => {
+        correctDecisionsInARow += 1;
+        infamy = infamy > 0 ? infamy - (1 + correctDecisionsInARow) : 0;
+        infamy = infamy < 0 ? 0 : infamy;
+        if (correctDecisionsInARow >= 3) {
+            score += 10;
+            secondaryText.text = "Referee'd consistenly! +$10";
         } else {
-            roundNumber += 1;
-            wait(3, () => {
-                startOfRound();
-            })
+            score += 5;
+            secondaryText.text = "Referee'd correctly! +$5";
         }
     }
+    let eventDecider = () => {
+        wait(3, () => {
+            if (infamy > MAX_INFAMY) {
+                gameOverDisbarred();
+            } else if (leftPlayerScore >= rightPlayerScore + VICTORY_DIFFERENCE) {
+                gameOverVictory("Left");
+            } else if (rightPlayerScore >= leftPlayerScore + VICTORY_DIFFERENCE) {
+                gameOverVictory("Right");            
+            } else if (roundNumber % 5 == 0 && score < moneyGoals[(roundNumber / 5) - 1]) {
+                gameOverBroke();
+            } else {
+                let currentGoal = moneyGoals[Math.floor(roundNumber / 5)];
+                let currentGoalRound = (Math.floor(roundNumber / 5) + 1) * 5;
+                secondaryText.text = "You must have $" + currentGoal + " by round " + currentGoalRound;
+                wait(3, () => {
+                    startOfRound();
+                });
+            }
+        })
+    }
     let gameOverDisbarred = () => {
-        mainText.text = "You have been disbarred for foul play";
-        secondaryText.text = "Press ESC to go back to menu"
+        mainText.text = "You are disbarred for foul play";
+        secondaryText.text = "Click to go back to menu"
         leftPlayer("spiral");
         rightPlayer("spiral");
         loop(1, () => {
             secondaryText.opacity = secondaryText.opacity == 1 ? 0 : 1;
-        })
+        });
+        onClick("secondaryText", () => { music.paused = true; go("menu", hiScore); })
     }
     let gameOverVictory = (player) => {
         mainText.text = player + " player has won";
-        secondaryText.text = "Press ESC to go back to menu"
+        secondaryText.text = "Click to go back to menu"
         if (player === "Left") {
             leftPlayer("grinning");
             rightPlayer("frowning");
@@ -527,7 +564,18 @@ scene("main", (hiScore = 0) => {
         }
         loop(1, () => {
             secondaryText.opacity = secondaryText.opacity == 1 ? 0 : 1;
-        })
+        });
+        onClick("secondaryText", () => { music.paused = true; go("menu", hiScore); })
+    }
+    let gameOverBroke = () => {
+        mainText.text = "You are disbarred for being too poor";
+        secondaryText.text = "Click to go back to menu"
+        leftPlayer("shocked");
+        rightPlayer("shocked");
+        loop(1, () => {
+            secondaryText.opacity = secondaryText.opacity == 1 ? 0 : 1;
+        });
+        onClick("secondaryText", () => { music.paused = true; go("menu", hiScore); })
     }
 
     // Controls
