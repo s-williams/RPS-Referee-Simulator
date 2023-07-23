@@ -85,6 +85,15 @@ scene("main", (hiScore = 0) => {
     onUpdate("scoreLabel", (it) => {
         it.text = "$" + String(score);
     });
+    const goalText = add([
+        text("", {
+            size: FONT_SIZE - 2,
+            font: "pixelFont"
+        }),
+        pos(width() / 2, 5),
+        color(0, 0, 0),
+        anchor("top")
+    ]);
     add([
         text("HI $" + String(hiScore), {
             size: FONT_SIZE,
@@ -401,20 +410,44 @@ scene("main", (hiScore = 0) => {
         if (roundNumber > 2) {
             // Always bribe on round 3
             if (roundNumber === 3) {
-                if (randi(0, 2) === 0) {
+                if (calculatedResult === "right") {
                     leftPlayerBribe(randi(5, 15));
+                } else if (calculatedResult === "left") {
+                    rightPlayerBribe(randi(5, 15)); 
                 } else {
-                    rightPlayerBribe(randi(5, 15));                    
+                    if (randi(0, 2) === 0) {
+                        leftPlayerBribe(randi(5, 15));
+                    } else {
+                        rightPlayerBribe(randi(5, 15));
+                    }
                 }
             } else if (roundNumber < 5) {
-                if (randi(0, 2) === 0) {
+                if (calculatedResult === "right") {
                     leftPlayerBribe(randi(5, 25));
+                } else if (calculatedResult === "left") {
+                    rightPlayerBribe(randi(5, 25));
                 } else {
-                    rightPlayerBribe(randi(5, 25));                    
+                    if (randi(0, 2) === 0) {
+                        leftPlayerBribe(randi(5, 25));
+                    } else {
+                        rightPlayerBribe(randi(5, 25));
+                    }
                 }
             } else {
-                leftPlayerBribe(randi(5 + roundNumber, 50 + (roundNumber * 2)));
-                rightPlayerBribe(randi(5 + roundNumber, 50 + (roundNumber * 2)));
+                const bribe1 = randi(5 + roundNumber, 50 + (roundNumber * 2));
+                const bribe2 = randi(5 + roundNumber, 50 + (roundNumber * 2));
+                const biggerBribe = Math.max(bribe1, bribe2);
+                const smallerBribe = Math.min(bribe1, bribe2);
+                if (calculatedResult === "right") {
+                    leftPlayerBribe(biggerBribe);
+                    rightPlayerBribe(smallerBribe);
+                } else if (calculatedResult === "left") {
+                    leftPlayerBribe(smallerBribe);
+                    rightPlayerBribe(biggerBribe);
+                } else {
+                    leftPlayerBribe(randi(5 + roundNumber, 50 + (roundNumber * 2)));
+                    rightPlayerBribe(randi(5 + roundNumber, 50 + (roundNumber * 2)));
+                }
             }
         }
     };
@@ -535,10 +568,8 @@ scene("main", (hiScore = 0) => {
             } else {
                 let currentGoal = moneyGoals[Math.floor(roundNumber / 5)];
                 let currentGoalRound = (Math.floor(roundNumber / 5) + 1) * 5;
-                secondaryText.text = "You must have $" + currentGoal + " by round " + currentGoalRound;
-                wait(3, () => {
-                    startOfRound();
-                });
+                goalText.text = "Goal $" + currentGoal + " by Round " + currentGoalRound;
+                startOfRound();
             }
         })
     }
